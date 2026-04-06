@@ -38,7 +38,7 @@ public class AdminFeatures {
             "Employee Management",
             "Product Management",
             "Suppliers",
-            "Sales & Purchase",
+            "Purchases",
             "Reports",
             "Log Out"
         };
@@ -47,7 +47,6 @@ public class AdminFeatures {
         dashboardBtn.setFont(new Font("SansSerif", Font.BOLD, 20));
         dashboardBtn.setBackground(new Color(42, 21, 127));
         dashboardBtn.setForeground(Color.WHITE);
-        dashboardBtn.addActionListener(null);
         sidebar.add(dashboardBtn);
 
         Button employeeMgmtBtn = new Button(btnMenu[1]);
@@ -84,7 +83,6 @@ public class AdminFeatures {
         salePurchaseBtn.setFont(new Font("SansSerif", Font.BOLD, 20));
         salePurchaseBtn.setBackground(new Color(42, 21, 127));
         salePurchaseBtn.setForeground(Color.WHITE);
-        salePurchaseBtn.addActionListener(null);
         sidebar.add(salePurchaseBtn);
 
         Button reportsBtn = new Button(btnMenu[5]);
@@ -106,12 +104,24 @@ public class AdminFeatures {
 
         frame.add(sidebar, BorderLayout.WEST);
 
-        // MAIN PANEL
-        JPanel mainPanel = new JPanel();
-        // mainPanel.setLayout(new GridLayout(2, 2, 10, 10));
-        mainPanel.setBackground(new Color(30, 30, 60));
+        // ! ── Main content area: swap views from sidebar (CardLayout) ─────────────
+        final JPanel contentPanel = new JPanel(new CardLayout());
+        contentPanel.setBackground(new Color(30, 30, 60));
 
-        frame.add(mainPanel, BorderLayout.CENTER);
+        JPanel dashboardHomePanel = new JPanel(new BorderLayout());
+        dashboardHomePanel.setBackground(new Color(30, 30, 60));
+        JLabel welcome = new JLabel("Welcome to Admin Dashboard", JLabel.CENTER);
+        welcome.setFont(new Font("SansSerif", Font.BOLD, 28));
+        welcome.setForeground(Color.WHITE);
+        dashboardHomePanel.add(welcome, BorderLayout.CENTER);
+
+        contentPanel.add(dashboardHomePanel, "HOME");
+        contentPanel.add(new SalesPurchasePanel(), "SALES_PURCHASE");
+
+        dashboardBtn.addActionListener(e -> ((CardLayout) contentPanel.getLayout()).show(contentPanel, "HOME"));
+        salePurchaseBtn.addActionListener(e -> ((CardLayout) contentPanel.getLayout()).show(contentPanel, "SALES_PURCHASE"));
+
+        frame.add(contentPanel, BorderLayout.CENTER);
 
         //! ----------------- FOOTER ------------------------------
         JPanel footer = new JPanel();

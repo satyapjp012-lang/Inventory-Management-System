@@ -145,24 +145,9 @@ public class EmployeeLogin extends Frame {
         // ! Button actions
         login.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                String user = tfUser.getText().trim();
-                String pass = tfPass.getText();
-                if (user.isEmpty() || pass.isEmpty()) {
-                    lblMessage.setText("Please enter username and password.");
-                    return;
-                } else if (user.contains(" ")) {
-                    lblMessage.setText("Username does not contain space");
-                    return;
-                } else if (!isValidEmail(user)) {
-                    lblMessage.setText("Invalid email format! Please enter correct email.");
-                    return;
-                } else if (!isCompanyEmail(user)) {
-                    lblMessage.setText("Use Company Email Only!");
-                    return;
-                } else {
-                    lblMessage.setText("Logging in...");
-                    // TODO: connect authentication logic here.
-                }
+                // Demo mode: open sales workspace directly on login click.
+                dispose();
+                new EmployeeDashboardFrame();
             }
         });
 
@@ -176,8 +161,8 @@ public class EmployeeLogin extends Frame {
 
         back.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                setVisible(false);
-                return;
+                dispose();
+                new LoginFrame();
             }
         });
 

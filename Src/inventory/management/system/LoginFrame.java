@@ -300,6 +300,7 @@ public class LoginFrame extends Frame implements ActionListener {
             dispose();
             System.exit(0);
         } else if (src == btnEmployeeLogin) {
+            dispose();
             new EmployeeLogin();
         }
     }
