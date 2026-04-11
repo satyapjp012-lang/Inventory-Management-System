@@ -23,6 +23,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
@@ -169,7 +170,7 @@ public class ReportPanel extends JPanel {
         // Left column: inputs + summary cards
         JPanel leftCol = new JPanel(new GridBagLayout());
         leftCol.setBackground(BG_DARK);
-        leftCol.setBorder(BorderFactory.createEmptyBorder(20, 10, 10, 10));
+        leftCol.setBorder(BorderFactory.createEmptyBorder(40, 10, 10, 10));
         GridBagConstraints lg = new GridBagConstraints();
         lg.insets = new Insets(6, 6, 6, 6);
         lg.anchor = GridBagConstraints.NORTHWEST;
@@ -181,7 +182,7 @@ public class ReportPanel extends JPanel {
         tfFrom.setFont(new Font("SansSerif", Font.BOLD, 18));
         tfFrom.setBackground(INPUT_BG);
         tfFrom.setForeground(TEXT_WHITE);
-        tfFrom.setPreferredSize(new Dimension(260, 40));
+        tfFrom.setPreferredSize(new Dimension(380, 40));
 
         JLabel lblTo = new JLabel("To (dd/mm/yyyy)");
         lblTo.setFont(FONT_LABEL);
@@ -190,7 +191,7 @@ public class ReportPanel extends JPanel {
         tfTo.setFont(new Font("SansSerif", Font.BOLD, 18));
         tfTo.setBackground(INPUT_BG);
         tfTo.setForeground(TEXT_WHITE);
-        tfTo.setPreferredSize(new Dimension(260, 40));
+        tfTo.setPreferredSize(new Dimension(380, 40));
 
         JButton btnCalc = new JButton("Calculate");
         btnCalc.setFont(FONT_BTN);
@@ -218,7 +219,7 @@ public class ReportPanel extends JPanel {
         lg.gridx = 0;
         lg.gridy = 3;
         lg.gridwidth = 2;
-        lg.weighty = 0.4; // proportional spacing above summary
+        lg.weighty = 0.6; // proportional spacing above summary
         lg.fill = GridBagConstraints.VERTICAL;
         leftCol.add(new JLabel(), lg);
 
@@ -248,7 +249,7 @@ public class ReportPanel extends JPanel {
         cardPurchTitle.setForeground(TEXT_WHITE);
         cardPurchTitle.setFont(FONT_LABEL);
         JLabel cardPurchAmt = new JLabel("0.00", SwingConstants.CENTER);
-        cardPurchAmt.setForeground(TEXT_WHITE);
+        cardPurchAmt.setForeground(ACCENT);
         cardPurchAmt.setFont(FONT_TITLE);
         cardPurch.add(cardPurchTitle, BorderLayout.NORTH);
         cardPurch.add(cardPurchAmt, BorderLayout.CENTER);
@@ -268,7 +269,7 @@ public class ReportPanel extends JPanel {
         sg.gridx = 0;
         sg.gridy = 0;
         sg.weightx = 1;
-        sg.weighty = 0.33;
+        sg.weighty = 0.6;
         summaryPanel.add(cardSales, sg);
         sg.gridx = 0;
         sg.gridy = 1;
@@ -302,7 +303,9 @@ public class ReportPanel extends JPanel {
 
         JPanel chartWrapper = new JPanel(new GridBagLayout());
         chartWrapper.setBackground(BG_DARK);
-        chartWrapper.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(ACCENT2), "Overview"));
+        TitledBorder border = BorderFactory.createTitledBorder(BorderFactory.createLineBorder(ACCENT2), "Overview");
+        border.setTitleColor(ACCENT);
+        chartWrapper.setBorder(border);
 
         GridBagConstraints cg = new GridBagConstraints();
         cg.insets = new Insets(6, 6, 6, 6);
@@ -357,8 +360,9 @@ public class ReportPanel extends JPanel {
         // Recent transactions table
         final DefaultTableModel recentModel = createNonEditableTableModel(new String[] { "Date", "Type", "Amount" });
         JPanel recentHolder = tableInScrollPane(recentModel);
-        recentHolder.setBorder(
-                BorderFactory.createTitledBorder(BorderFactory.createLineBorder(ACCENT2), "Recent Transactions"));
+        TitledBorder border2 =  BorderFactory.createTitledBorder(BorderFactory.createLineBorder(ACCENT2), "Recent Transactions");
+        border2.setTitleColor(ACCENT);
+        recentHolder.setBorder(border2);
 
         rg.gridy = 1;
         rg.weighty = 0.5;
@@ -408,22 +412,31 @@ public class ReportPanel extends JPanel {
             barPurch.revalidate();
             barProfit.revalidate();
 
-            // Load recent transactions (lightweight placeholder query)
+            // Load recent transactions (defensive, avoids NPE when DB empty)
             recentModel.setRowCount(0);
-            try {
-                Connection conn = DBConnection.getConnection();
-                String q = "SELECT DATE, 'Sale' as TYPE, (QUANTITY * SELLING_UNIT_PRICE) as AMOUNT FROM SALES WHERE DATE >= ? AND DATE <= ? UNION ALL SELECT DATE, 'Purchase' as TYPE, (QUANTITY * UNIT_PRICE) as AMOUNT FROM PURCHASE WHERE DATE >= ? AND DATE <= ? ORDER BY DATE DESC LIMIT 10;";
-                PreparedStatement ps = conn.prepareStatement(q);
-                ps.setString(1, from);
-                ps.setString(2, to);
-                ps.setString(3, from);
-                ps.setString(4, to);
-                ResultSet rs = ps.executeQuery();
-                while (rs.next()) {
-                    recentModel.addRow(new Object[] { rs.getString("DATE"), rs.getString("TYPE"),
-                            String.format("%.2f", rs.getDouble("AMOUNT")) });
+            String qRecent = "SELECT DATE, 'Sale' AS TYPE, (QUANTITY * SELLING_UNIT_PRICE) AS AMOUNT FROM SALES WHERE DATE >= ? AND DATE <= ? "
+                    + "UNION ALL SELECT DATE, 'Purchase' AS TYPE, (QUANTITY * UNIT_PRICE) AS AMOUNT FROM PURCHASE WHERE DATE >= ? AND DATE <= ? ORDER BY DATE DESC LIMIT 10;";
+            try (Connection conn = DBConnection.getConnection()) {
+                if (conn == null) {
+                    System.err.println("DB connection is null when loading recent transactions");
+                } else {
+                    try (PreparedStatement ps = conn.prepareStatement(qRecent)) {
+                        ps.setString(1, from);
+                        ps.setString(2, to);
+                        ps.setString(3, from);
+                        ps.setString(4, to);
+                        try (ResultSet rs = ps.executeQuery()) {
+                            while (rs.next()) {
+                                String date = rs.getString("DATE");
+                                String type = rs.getString("TYPE");
+                                double amount = rs.getDouble("AMOUNT");
+                                if (rs.wasNull()) amount = 0.0;
+                                recentModel.addRow(new Object[] { date == null ? "" : date, type == null ? "" : type,
+                                        String.format("%.2f", amount) });
+                            }
+                        }
+                    }
                 }
-                conn.close();
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
@@ -435,19 +448,25 @@ public class ReportPanel extends JPanel {
     private void loadLowStockData(int threshold) {
         lowStockModel.setRowCount(0);
         try {
-            Connection conn = DBConnection.getConnection();
             String q = "SELECT PRODUCT.PRODUCT_ID, PRODUCT.PRODUCT_NAME, PRODUCT_QUANTITY.QUANTITY FROM PRODUCT INNER JOIN PRODUCT_QUANTITY WHERE PRODUCT.PRODUCT_ID = PRODUCT_QUANTITY.PRODUCT_ID AND PRODUCT_QUANTITY.QUANTITY <= ? ORDER BY PRODUCT_QUANTITY.QUANTITY ASC;";
-            PreparedStatement ps = conn.prepareStatement(q);
-            ps.setInt(1, threshold);
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                lowStockModel.addRow(new Object[] {
-                        rs.getString("PRODUCT_ID"),
-                        rs.getString("PRODUCT_NAME"),
-                        rs.getInt("QUANTITY")
-                });
+            try (Connection conn = DBConnection.getConnection()) {
+                if (conn == null) {
+                    System.err.println("DB connection is null in loadLowStockData");
+                    return;
+                }
+                try (PreparedStatement ps = conn.prepareStatement(q)) {
+                    ps.setInt(1, threshold);
+                    try (ResultSet rs = ps.executeQuery()) {
+                        while (rs.next()) {
+                            String pid = rs.getString("PRODUCT_ID");
+                            String pname = rs.getString("PRODUCT_NAME");
+                            int qty = rs.getInt("QUANTITY");
+                            if (rs.wasNull()) qty = 0;
+                            lowStockModel.addRow(new Object[] { pid == null ? "" : pid, pname == null ? "" : pname, qty });
+                        }
+                    }
+                }
             }
-            conn.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -456,15 +475,23 @@ public class ReportPanel extends JPanel {
     private double computeTotalSales(String from, String to) {
         double total = 0.0;
         try {
-            Connection conn = DBConnection.getConnection();
-            String q = "SELECT SUM(QUANTITY * SELLING_UNIT_PRICE) AS TOTAL FROM SALES WHERE DATE >= ? AND DATE <= ?;";
-            PreparedStatement ps = conn.prepareStatement(q);
-            ps.setString(1, from);
-            ps.setString(2, to);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next())
-                total = rs.getDouble("total");
-            conn.close();
+            String q = "SELECT COALESCE(SUM(QUANTITY * SELLING_UNIT_PRICE), 0) AS TOTAL FROM SALES WHERE DATE >= ? AND DATE <= ?;";
+            try (Connection conn = DBConnection.getConnection()) {
+                if (conn == null) {
+                    System.err.println("DB connection is null in computeTotalSales");
+                    return 0.0;
+                }
+                try (PreparedStatement ps = conn.prepareStatement(q)) {
+                    ps.setString(1, from);
+                    ps.setString(2, to);
+                    try (ResultSet rs = ps.executeQuery()) {
+                        if (rs.next()) {
+                            total = rs.getDouble("TOTAL");
+                            if (rs.wasNull()) total = 0.0;
+                        }
+                    }
+                }
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -474,15 +501,23 @@ public class ReportPanel extends JPanel {
     private double computeTotalPurchases(String from, String to) {
         double total = 0.0;
         try {
-            Connection conn = DBConnection.getConnection();
-            String q = "SELECT SUM(QUANTITY * UNIT_PRICE) as total FROM PURCHASE WHERE DATE >= ? AND DATE <= ?;";
-            PreparedStatement ps = conn.prepareStatement(q);
-            ps.setString(1, from);
-            ps.setString(2, to);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next())
-                total = rs.getDouble("total");
-            conn.close();
+            String q = "SELECT COALESCE(SUM(QUANTITY * UNIT_PRICE), 0) AS TOTAL FROM PURCHASE WHERE DATE >= ? AND DATE <= ?;";
+            try (Connection conn = DBConnection.getConnection()) {
+                if (conn == null) {
+                    System.err.println("DB connection is null in computeTotalPurchases");
+                    return 0.0;
+                }
+                try (PreparedStatement ps = conn.prepareStatement(q)) {
+                    ps.setString(1, from);
+                    ps.setString(2, to);
+                    try (ResultSet rs = ps.executeQuery()) {
+                        if (rs.next()) {
+                            total = rs.getDouble("TOTAL");
+                            if (rs.wasNull()) total = 0.0;
+                        }
+                    }
+                }
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

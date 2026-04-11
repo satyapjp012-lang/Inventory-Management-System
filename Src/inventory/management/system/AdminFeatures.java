@@ -172,7 +172,7 @@ public class AdminFeatures {
         salePurchaseBtn
                 .addActionListener(e -> ((CardLayout) contentPanel.getLayout()).show(contentPanel, "SALES_PURCHASE"));
 
-                reportsBtn.addActionListener(e -> ((CardLayout) contentPanel.getLayout()).show(contentPanel, "REPORTS"));
+        reportsBtn.addActionListener(e -> ((CardLayout) contentPanel.getLayout()).show(contentPanel, "REPORTS"));
 
         frame.add(contentPanel, BorderLayout.CENTER);
 
