@@ -50,8 +50,8 @@ public class EmployeeDashboardFrame extends JFrame {
         logout.setBackground(new Color(122, 21, 127));
         logout.setForeground(Color.WHITE);
         logout.addActionListener(e ->{
-            dispose();
             new EmployeeLogin();
+            dispose();
             return;
         });
 
@@ -75,7 +75,4 @@ public class EmployeeDashboardFrame extends JFrame {
         setVisible(true);
     }
 
-    public static void main(String[] args) {
-        new EmployeeDashboardFrame("", "");
-    }
 }

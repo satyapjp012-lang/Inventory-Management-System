@@ -89,7 +89,6 @@ public class ExistingProduct extends JFrame {
         productNameField.setBackground(Color.WHITE);
         productNameField.setForeground(Color.BLACK);
         productNameField.setBounds(350, 150, 350, 30);
-        productNameField.setEditable(false);
         form.add(productNameField);
 
         JLabel categorylbl = new JLabel("Category: ");
@@ -366,8 +365,8 @@ public class ExistingProduct extends JFrame {
         newProduct.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                setVisible(false);
                 new AddProduct();
+                setVisible(false);
                 return;
             }
         });
@@ -375,8 +374,8 @@ public class ExistingProduct extends JFrame {
         back.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                setVisible(false);
                 new AdminFeatures();
+                setVisible(false);
                 return;
             }
         });
@@ -404,7 +403,4 @@ public class ExistingProduct extends JFrame {
         setVisible(true);
     }
 
-    public static void main(String[] args) {
-        new ExistingProduct();
-    }
 }

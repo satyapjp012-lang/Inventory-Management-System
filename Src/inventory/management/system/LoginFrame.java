@@ -303,8 +303,8 @@ public class LoginFrame extends Frame implements ActionListener {
             dispose();
             System.exit(0);
         } else if (src == btnEmployeeLogin) {
-            dispose();
             new EmployeeLogin();
+            dispose();
         }
     }
 
@@ -363,8 +363,6 @@ public class LoginFrame extends Frame implements ActionListener {
 
     // ── main ───────────────────────────────────────────────────────────────────
     public static void main(String[] args) {
-        // System.setProperty("awt.useSystemAAFontSettings", "on");
-        // System.setProperty("swing.aatext", "true");
         EventQueue.invokeLater(() -> new LoginFrame());
     }
 }

@@ -1045,8 +1045,8 @@ public class EmployeeManagementUI extends JFrame implements ActionListener {
         } else if (e.getSource() == btnDelete) {
             cardLayout.show(rightPanel, "DELETE");
         } else if (e.getSource() == btnExit) {
-            dispose();
             new AdminFeatures();
+            dispose();
         }
     }
 
@@ -1084,7 +1084,4 @@ public class EmployeeManagementUI extends JFrame implements ActionListener {
         });
     }
 
-    public static void main(String[] args) {
-        new EmployeeManagementUI();
-    }
 }

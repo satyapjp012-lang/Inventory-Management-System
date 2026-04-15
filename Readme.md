@@ -100,11 +100,12 @@ cd inventory-management-system
 
 ### 2. Configure Environment Variables
 
-Create a `.properties` file in root:
+Create a `config.properties` file in root:
 
 ```
 DB_URL=jdbc:mysql://localhost:3306/your_db
 DB_USERNAME=root
+
 DB_PASSWORD=your_password
 ```
 
@@ -153,7 +154,6 @@ java LoginFrame
 
 ## 📸 Screenshots
 
-*Add your screenshots here*
 ![Front Page](Screenshots/image.png)
 ![Purchase Page](Screenshots/image-1.png)
 
@@ -162,8 +162,11 @@ java LoginFrame
 ## 👨‍💻 Author
 
 **Aditya Patel**
-Computer Science Student
-Project: Inventory Management System
+**Ravi Kishan Gaur**
+**Vishal Singh**
+**Satya Narayan**
+* Computer Science Student
+* Project: Inventory Management System
 
 ---
 

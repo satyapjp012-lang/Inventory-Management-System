@@ -198,8 +198,8 @@ public class EmployeeLogin extends Frame {
 
         back.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                dispose();
                 new LoginFrame();
+                dispose();
                 return;
             }
         });
@@ -211,7 +211,4 @@ public class EmployeeLogin extends Frame {
 
     }
 
-    public static void main(String[] args) {
-        new EmployeeLogin();
-    }
 }
