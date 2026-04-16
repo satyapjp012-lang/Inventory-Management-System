@@ -173,3 +173,10 @@ java LoginFrame
 ## 📄 License
 
 This project is for educational purposes.
+dded a Future Plans section with 11 upgrade ideas including:
+
+📱 Mobile & 🌐 Web version
+🔔 Low stock alerts & 📧 email notifications
+📊 Advanced analytics & 🖨️ PDF export
+☁️ Cloud database & 👥 multi-user roles
+🔄 Barcode scanner & 🧾 GST/Tax support
